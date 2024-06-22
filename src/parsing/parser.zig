@@ -389,6 +389,10 @@ pub fn ParserType(comptime options: TemplateOptions) type {
                     list.appendAssumeCapacity(try self.createElement(node));
                 }
             }
+            if (is_comptime) {
+                const final: [list.items.len]Element = list.items.ptr[0..list.items.len].*;
+                return try render.render(&final);
+            }
 
             const elements = if (options.output == .render or options.load_mode == .comptime_loaded) list.items else try list.toOwnedSlice(self.gpa);
             try render.render(elements);
@@ -447,7 +451,12 @@ pub fn ParserType(comptime options: TemplateOptions) type {
             } else {
                 const path_separator = ".";
                 var iterator = std.mem.tokenize(u8, identifier, path_separator);
-                return (try action(self, &iterator, 0)) orelse empty;
+                const path = (try action(self, &iterator, 0)) orelse empty;
+                if (is_comptime) {
+                    const final = path.ptr[0..path.len].*;
+                    return &final;
+                }
+                return path;
             }
         }
 
@@ -561,7 +570,7 @@ test "Basic parse" {
 
         calls: u32 = 0,
 
-        pub fn render(ctx: *@This(), elements: []Element) Error!void {
+        pub fn render(ctx: *@This(), elements: []const Element) Error!void {
             defer ctx.calls += 1;
 
             switch (ctx.calls) {
@@ -687,7 +696,7 @@ test "Scan standAlone tags" {
 
         calls: u32 = 0,
 
-        pub fn render(ctx: *@This(), elements: []Element) Error!void {
+        pub fn render(ctx: *@This(), elements: []const Element) Error!void {
             defer ctx.calls += 1;
 
             switch (ctx.calls) {
@@ -746,7 +755,7 @@ test "Scan delimiters Tags" {
 
         calls: u32 = 0,
 
-        pub fn render(ctx: *@This(), elements: []Element) Error!void {
+        pub fn render(ctx: *@This(), elements: []const Element) Error!void {
             defer ctx.calls += 1;
 
             switch (ctx.calls) {

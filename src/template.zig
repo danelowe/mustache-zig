@@ -391,9 +391,9 @@ pub fn TemplateLoaderType(comptime options: TemplateOptions) type {
         const Collector = struct {
             pub const Error = error{};
 
-            elements: []Element = &.{},
+            elements: []const Element = &.{},
 
-            pub inline fn render(ctx: *Collector, elements: []Element) Error!void {
+            pub inline fn render(ctx: *Collector, elements: []const Element) Error!void {
                 ctx.elements = elements;
             }
         };
@@ -412,9 +412,10 @@ pub fn TemplateLoaderType(comptime options: TemplateOptions) type {
 
             var collector = Collector{};
             const success = try parser.parse(&collector);
+            const elements = collector.elements;
 
             self.result = if (success) .{
-                .elements = collector.elements,
+                .elements = elements,
             } else .{
                 .parser_error = parser.last_error.?,
             };

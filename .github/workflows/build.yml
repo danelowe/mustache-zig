@@ -38,11 +38,10 @@ jobs:
         run: |
           sudo apt-get install -y kcov
 
-      # No comptime tests for now.
       - name: Run Tests
         run: |
           zig version
-          zig build test -Dcomptime-tests=false ${{ matrix.coverage }}
+          zig build test ${{ matrix.coverage }}
 
       - name: Upload Codecov
         if: ${{ matrix.os == 'ubuntu-latest' }}

@@ -258,10 +258,10 @@ pub fn TextScannerType(comptime Node: type, comptime options: TemplateOptions) t
                     .matching_close => |*close_state| {
                         const delimiter_char = self.delimiters.ending_delimiter[close_state.delimiter_index];
                         if (char == delimiter_char) {
+                            const part_type = close_state.part_type;
                             const next_index = close_state.delimiter_index + 1;
-
                             if (self.delimiters.ending_delimiter.len == next_index) {
-                                self.state = .{ .produce_close = close_state.part_type };
+                                self.state = .{ .produce_close = part_type };
                             } else {
                                 close_state.delimiter_index = next_index;
                             }
